@@ -13,7 +13,10 @@ namespace MovieCatalog.Controllers
         // Load movies from a JSON file
         private List<Movie> LoadMovies()
         {
+            // Read the JSON file content
             var jsonData = System.IO.File.ReadAllText("Data/movies.json");
+
+            // Deserialize the JSON data into a list of movies = convert JSON → object
             return JsonSerializer.Deserialize<List<Movie>>(jsonData) ?? new List<Movie>();
         }
 
