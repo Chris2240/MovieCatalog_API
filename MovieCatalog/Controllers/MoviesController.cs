@@ -10,6 +10,17 @@ namespace MovieCatalog.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
+        /*        
+            ---------------------------------------------
+
+        // Phase 1 "LINQ + JSON" which is still works after "EF Core" setup only without transition yet (keep for references)
+        
+            ---------------------------------------------
+        * without EF Core - start debug "F5" as "http"
+        * with EF Core -    "dotnet run" from terminal        
+
+        */
+
         // Load movies from a JSON file
         private List<Movie> LoadMovies()
         {

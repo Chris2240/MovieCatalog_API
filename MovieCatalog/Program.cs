@@ -1,4 +1,9 @@
 
+using Microsoft.EntityFrameworkCore;
+using MovieCatalog.Data;
+using MovieCatalog.Models;
+using System.Text.Json;
+
 namespace MovieCatalog
 {
     public class Program
@@ -13,6 +18,9 @@ namespace MovieCatalog
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Register EF Core with InMemory database
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("MovieCatalogDb"));  // Use InMemory "MovieCatalogDb" while app is running
 
             var app = builder.Build();
 
@@ -29,6 +37,29 @@ namespace MovieCatalog
 
 
             app.MapControllers();
+            
+            // Seed DB from movies.json
+            using (var scope = app.Services.CreateScope())  // Create a scope to get scoped services like DbContext
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();  // Get the AppDbContext instance
+
+                if (!db.Movies.Any())   // Check if the Movies table is empty
+                {
+                    var jsonFile = Path.Combine(app.Environment.ContentRootPath, "Data", "movies.json");    // Path to movies.json file
+
+                    if (File.Exists(jsonFile))  // Check if the file exists
+                    {
+                        var json = File.ReadAllText(jsonFile);  // Read the file content
+                        var movies = JsonSerializer.Deserialize<List<Movie>>(json); // Deserialize JSON to List<Movie>
+
+                        if (movies != null && movies.Count > 0)
+                        {
+                            db.Movies.AddRange(movies); // Add movies to the DbContext
+                            db.SaveChanges();   // Save changes to the in-memory database
+                        }
+                    }
+                }
+            }
 
             app.Run();
         }
