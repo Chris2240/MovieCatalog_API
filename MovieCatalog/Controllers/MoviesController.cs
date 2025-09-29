@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MovieCatalog.Data;
 using MovieCatalog.Models;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 
 namespace MovieCatalog.Controllers
@@ -21,6 +25,8 @@ namespace MovieCatalog.Controllers
 
         */
 
+        /*
+        
         // Load movies from a JSON file
         private List<Movie> LoadMovies()
         {
@@ -54,7 +60,7 @@ namespace MovieCatalog.Controllers
         // GET: api/Movies/rating
         // Returns movies by providing rating number
         [HttpGet("rating")]
-        public ActionResult GetRated(double rate_provide) 
+        public ActionResult GetRated(double rate_provide)
         {
             // Load all movies
             var movies = LoadMovies();
@@ -84,5 +90,177 @@ namespace MovieCatalog.Controllers
             return Ok(filtered);
         }
 
+        */
+
+        /*
+            ---------------------------------------------
+        
+            Phase 2b - Transition JSON to EF Core:
+
+            ---------------------------------------------
+        */
+
+        // Inject AppDbContext to interact with the database in the controller
+        private readonly AppDbContext _dbContext;
+
+        // Constructor to initialize the AppDbContext for the controller class
+        public MoviesController(AppDbContext dbContext)   // Dependency Injection of AppDbContext in the constructor
+        {
+            this._dbContext = dbContext;
+        }
+
+        // GET: api/Movies
+        // Returns all movies
+        [HttpGet]
+        public ActionResult GetAllMovies()
+        {
+            var movies = _dbContext.Movies.ToList();  // Retrieve all movies from the database and convert to list
+            return Ok(movies);
+        }
+
+        // GET: api/Movies/top-rated
+        // Returns top-rated movies, default is 1
+        [HttpGet("top-rated")]
+        public ActionResult GetTopMovie(int count = 1)
+        {
+            // Get top 'count' movies by rating in descending order
+            var top = _dbContext.Movies.OrderByDescending(m => m.Rating)
+                .Take(count)
+                .ToList();      // Execute the query and convert to list - VERRY IMPORTANT: the query is executed inside your controller
+
+            return Ok(top);
+        }
+
+        // GET: api/Movies/rating
+        [HttpGet("rating")]
+        public ActionResult GetRated(double rate_provide)
+        {
+            // Filter movies by the specified rating
+            var rating = _dbContext.Movies
+                .Where(m => m.Rating.Equals(rate_provide))
+                .ToList();      // Execute the query and convert to list
+
+            return Ok(rating);
+        }
+
+        // GET: api/Movies/descending order by year
+        // Returns Movies in descending order by year
+        [HttpGet("deccending order by year")]
+        public ActionResult GetByYear()
+        {
+            var filteredByDecending = _dbContext.Movies
+                .OrderByDescending(m => m.Year)
+                .ToList();
+
+            return Ok(filteredByDecending);
+        }
+
+        // GET: api/Movies/genre/{genre}
+        // Returns movies by genre
+        [HttpGet("genre/{genre}")]  // "../{genre}" - means required parameter
+        public ActionResult GetByGenre(string genre)
+        {
+            var filtredByGenre = _dbContext.Movies
+                .Where(m => m.Genre.Equals(genre, StringComparison.OrdinalIgnoreCase)) // Case-insensitive comparison for genre - an example "AcTion" == "action"
+                .ToList();
+
+            return Ok(filtredByGenre);
+        }
+
+        // Extra: "Select" query purpose and "BadRequest" custom message example
+        // GET: api/Movies/id/title/genre/{id_selected}
+        // Returns Movie id, title and genre
+        [HttpGet("id/title/genre/{id_selected}")]
+        public ActionResult GetTitle(int id_selected)
+        {
+            var allMovies = _dbContext.Movies.ToList();     // Get all movies from the database
+
+            // Check if the provided id_selected exists in the database and return only if it exists otherwise return BadRequest custom message with available Id's only
+            // "if (id_selected != allMovies.FirstOrDefault(m => m.Id == id_selected)?.Id)" - works but nullable check alternative
+            if (!allMovies.Any(m => m.Id == id_selected))
+            {
+
+                return BadRequest($"Invalid Id. Please select the available Id's from the following: {string.Join(", ", allMovies.Select(m => m.Id))}");
+
+            }
+            else
+            {
+                // Use LINQ to filter and select only Id, Title and Genre fields
+                var filteredByTitle = _dbContext.Movies
+                .Where(m => m.Id.Equals(id_selected))
+                .Select(m => new { m.Id, m.Title, m.Genre })    // Select only Id, Title and Genre fields
+                .ToList();
+
+                return Ok(filteredByTitle);
+            }
+        }
+
+
+        /*         
+            ---------------------------------------------
+
+            Phase 2c - Add CRUD Endpoints
+
+            ---------------------------------------------
+        */
+
+        // POST: api/Movies
+        // Crate new Movie
+        [HttpPost("create new movie")]
+        public ActionResult CreateMovie(Movie newMovie)
+        {
+            _dbContext.Movies.Add(newMovie);
+            _dbContext.SaveChanges();
+
+            return CreatedAtAction(nameof(GetAllMovies), new { id = newMovie.Id }, newMovie);
+        }
+
+        // PUT: api/Movies/{id}
+        // Update Movie
+        [HttpPut("update_movie/{id}")]
+        public ActionResult UpdateMovie(int id, Movie updateMovie)
+        {
+            var existingMovie = _dbContext.Movies.Find(id);
+
+            // if movie not exist return not found
+            if (existingMovie == null)
+            {
+                return NotFound();
+            }
+
+            // Only update fields if they are provided (not default/null/empty)
+            if (!string.IsNullOrWhiteSpace(updateMovie.Title) && updateMovie.Title != "string") // to avoid empty or whitespace and default "string" value from Swagger UI
+                existingMovie.Title = updateMovie.Title;
+
+            if (!string.IsNullOrWhiteSpace(updateMovie.Genre) && updateMovie.Genre != "string")
+                existingMovie.Genre = updateMovie.Genre;
+
+            if (updateMovie.Year != default)
+                existingMovie.Year = updateMovie.Year;
+
+            if (updateMovie.Rating != default)
+                existingMovie.Rating = updateMovie.Rating;
+
+            _dbContext.SaveChanges();
+            return Ok(existingMovie);
+        }
+
+        // DELETE: api/Movies/{id}
+        // Delete Movie using "Id"
+        [HttpDelete("delete_movie{id}")]
+        public ActionResult DeleteMovie(int id)
+        {
+            var findMovie = _dbContext.Movies.Find(id);     // Find the movie by ID
+
+            if (findMovie == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.Movies.Remove(findMovie);
+            _dbContext.SaveChanges();
+
+            return NoContent();     // Standard response for successful DELETE requests
+        }
     }
 }
