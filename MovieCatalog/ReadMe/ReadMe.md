@@ -1,6 +1,6 @@
 # MovieCatalog Web API - Backend
 
-In tis projct I have been given the following task to achive a backend of ASP.NET Core Web API built with **Phase 1 - LINQ + JSON (Core C# & LINQ - Read Only)** and **Phase 2 – CRUD + EF Core (Real Backend)**
+In this project I have been given the following task to achieve a backend "MovieCatalog" of ASP.NET Core Web API built with **Phase 1 - LINQ + JSON (Core C# & LINQ - Read Only)** and **Phase 2 – CRUD + EF Core (Real Backend)**.
 
 The API provides endpoints for querying, filtering, and managing a movie catalog.
 
