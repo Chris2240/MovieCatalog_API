@@ -22,6 +22,18 @@ namespace MovieCatalog
             // Register EF Core with InMemory database
             builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("MovieCatalogDb"));  // Use InMemory "MovieCatalogDb" while app is running
 
+            // CORS: allow requests from your Blazor client origin to access this API in frontend calls
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowBlazorClient", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5269")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                    // .AllowCredentials(); // enable only if you need cookies/credentials
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -32,6 +44,9 @@ namespace MovieCatalog
             }
 
             app.UseHttpsRedirection();
+
+            // Enable CORS BEFORE authorization and before mapping controllers
+            app.UseCors("AllowBlazorClient");
 
             app.UseAuthorization();
 
