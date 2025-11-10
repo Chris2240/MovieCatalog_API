@@ -143,9 +143,9 @@ namespace MovieCatalog.Controllers
             return Ok(rating);
         }
 
-        // GET: api/Movies/descending order by year
+        // GET: api/Movies/descending-order-by-year
         // Returns Movies in descending order by year
-        [HttpGet("deccending order by year")]
+        [HttpGet("descending-order-by-year")]
         public ActionResult GetByYear()
         {
             var filteredByDecending = _dbContext.Movies
@@ -205,8 +205,8 @@ namespace MovieCatalog.Controllers
         */
 
         // POST: api/Movies
-        // Crate new Movie
-        [HttpPost("create new movie")]
+        // Create new Movie
+        [HttpPost("create-new-movie")]
         public ActionResult CreateMovie(Movie newMovie)
         {
             _dbContext.Movies.Add(newMovie);
