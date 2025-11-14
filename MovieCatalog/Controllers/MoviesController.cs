@@ -204,11 +204,39 @@ namespace MovieCatalog.Controllers
             ---------------------------------------------
         */
 
+        /*
+         1. Create - POST
+         2. Read - GET (already implemented above)
         // POST: api/Movies
         // Create new Movie
         [HttpPost("create-new-movie")]
         public ActionResult CreateMovie(Movie newMovie)
         {
+            _dbContext.Movies.Add(newMovie);
+            _dbContext.SaveChanges();
+
+            return CreatedAtAction(nameof(GetAllMovies), new { id = newMovie.Id }, newMovie);
+        }
+        */
+
+        // POST: api/Movies
+        // Create new Movie - Upgraded version (with validation)
+        [HttpPost("create-new-movie")]
+        public ActionResult CreateMovie(Movie newMovie)
+        {
+            // Ensure Id is non-negative and not equal to 0.
+            if (newMovie.Id <= 0)
+            {
+                return BadRequest("Invalid Id. Id must be greater and not equal to 0.");
+            }
+
+            // Check if a movie with this Id already exists
+            if (_dbContext.Movies.Any(m => m.Id == newMovie.Id))
+            {
+                return BadRequest($"The movie with Id: '{newMovie.Id}' already exists.");
+            }
+
+            // Save new movie to the database
             _dbContext.Movies.Add(newMovie);
             _dbContext.SaveChanges();
 
