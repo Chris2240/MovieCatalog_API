@@ -257,10 +257,10 @@ namespace MovieCatalog.Controllers
             }
 
             // Only update fields if they are provided (not default/null/empty)
-            if (!string.IsNullOrWhiteSpace(updateMovie.Title) && updateMovie.Title != "string") // to avoid empty or whitespace and default "string" value from Swagger UI
+            if (!string.IsNullOrWhiteSpace(updateMovie.Title) && updateMovie.Title != "string" || updateMovie.Title == string.Empty) // Accept only a non-empty, non-whitespace and non-default "string" title or empty string(null)
                 existingMovie.Title = updateMovie.Title;
 
-            if (!string.IsNullOrWhiteSpace(updateMovie.Genre) && updateMovie.Genre != "string")
+            if (!string.IsNullOrWhiteSpace(updateMovie.Genre) && updateMovie.Genre != "string" || updateMovie.Genre == string.Empty)
                 existingMovie.Genre = updateMovie.Genre;
 
             if (updateMovie.Year != default)
