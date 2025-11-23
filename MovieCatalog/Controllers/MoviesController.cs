@@ -275,7 +275,7 @@ namespace MovieCatalog.Controllers
 
         // DELETE: api/Movies/{id}
         // Delete Movie using "Id"
-        [HttpDelete("delete_movie{id}")]
+        [HttpDelete("delete_movie/{id}")] //  "/" added before "{id}" to avoid route conflict with other GET endpoints
         public ActionResult DeleteMovie(int id)
         {
             var findMovie = _dbContext.Movies.Find(id);     // Find the movie by ID
