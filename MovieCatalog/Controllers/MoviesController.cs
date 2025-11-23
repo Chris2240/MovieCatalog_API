@@ -114,7 +114,9 @@ namespace MovieCatalog.Controllers
         [HttpGet]
         public ActionResult GetAllMovies()
         {
-            var movies = _dbContext.Movies.ToList();  // Retrieve all movies from the database and convert to list
+            var movies = _dbContext.Movies.
+                OrderBy(m => m.Id).ToList();  // Retrieve all movies from the database in order by "Id" and convert to the list
+
             return Ok(movies);
         }
 
