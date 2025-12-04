@@ -265,11 +265,24 @@ namespace MovieCatalog.Controllers
             if (!string.IsNullOrWhiteSpace(updateMovie.Genre) && updateMovie.Genre != "string" || updateMovie.Genre == string.Empty)
                 existingMovie.Genre = updateMovie.Genre;
 
-            if (updateMovie.Year != default)
+            // For Year and Rating, we check if is not negative if so we set to 0 otherwise update into provided value
+            if (updateMovie.Year <= 0)
+            {
+                existingMovie.Year = 0;
+            }
+            else if (updateMovie.Year != default)   // default(int) is 0
+            {
                 existingMovie.Year = updateMovie.Year;
+            }
 
-            if (updateMovie.Rating != default)
+            if (updateMovie.Rating <= 0)
+            {
+                existingMovie.Rating = 0;
+            }
+            else if (updateMovie.Rating != default)     // default(double) is 0.0
+            {
                 existingMovie.Rating = updateMovie.Rating;
+            }
 
             _dbContext.SaveChanges();
             return Ok(existingMovie);
