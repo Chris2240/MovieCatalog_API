@@ -22,7 +22,7 @@ The API provides endpoints for querying, filtering, and managing a movie catalog
 	* clone the project from the github repository(the link was provided into this path),
 	* then open the gitBash using right click (if you have already generally installed the git bush into your PC)
    ```bash
-   git clone https://github.com/yourusername/MovieCatalog.git (whatever the link is copied)
+   git clone https://github.com/Chris2240/MovieCatalog_API.git (whatever the link is copied)
    cd MovieCatalog
 
 2. Install dependencies:
