@@ -95,7 +95,7 @@ namespace MovieCatalog.Controllers
         /*
             ---------------------------------------------
         
-            Phase 2b - Transition JSON to EF Core:
+            Phase 2b - Transition JSON to EF Core (HTTP Read Only. The CRUD is implemented below in Phase 2c):
 
             ---------------------------------------------
         */
@@ -201,25 +201,21 @@ namespace MovieCatalog.Controllers
         /*         
             ---------------------------------------------
 
-            Phase 2c - Add CRUD Endpoints
+            Phase 2c - Add CRUD Endpoints (POST, PUT and DELETE)
 
             ---------------------------------------------
         */
 
-        /*
-         1. Create - POST
-         2. Read - GET (already implemented above)
         // POST: api/Movies
         // Create new Movie
-        [HttpPost("create-new-movie")]
-        public ActionResult CreateMovie(Movie newMovie)
-        {
-            _dbContext.Movies.Add(newMovie);
-            _dbContext.SaveChanges();
+        //[HttpPost("create-new-movie")]
+        //public ActionResult CreateMovie(Movie newMovie)
+        //{
+        //    _dbContext.Movies.Add(newMovie);
+        //    _dbContext.SaveChanges();
 
-            return CreatedAtAction(nameof(GetAllMovies), new { id = newMovie.Id }, newMovie);
-        }
-        */
+        //    return CreatedAtAction(nameof(GetAllMovies), new { id = newMovie.Id }, newMovie);
+        //}
 
         // POST: api/Movies
         // Create new Movie - Upgraded version (with validation)
